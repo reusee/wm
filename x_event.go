@@ -66,15 +66,19 @@ func (_ Def) SetupEventHandler(
 						).Check())
 						cur.Call(func(
 							manage ManageWindow,
+							stack StackByLastFocus,
 						) {
 							manage(ev.Window)
+							stack()
 						})
 
 					case xproto.UnmapNotifyEvent:
 						cur.Call(func(
 							unmanage UnmanageWindow,
+							stack StackByLastFocus,
 						) {
 							unmanage(ev.Window)
+							stack()
 						})
 
 					case xproto.CreateNotifyEvent:

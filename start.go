@@ -24,6 +24,8 @@ func (_ Def) Start(
 		setupEventHandler()
 
 		ce(exec.Command("terminal").Start())
+		ce(exec.Command("gedit").Start())
+		ce(exec.Command("gnome-calculator").Start())
 
 		pt("started\n")
 
