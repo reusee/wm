@@ -15,8 +15,8 @@ type (
 )
 
 var (
-	pt     = fmt.Printf
-	ce, he = e4.Check, e4.Handle
-	is     = errors.Is
-	as     = errors.As
+	pt         = fmt.Printf
+	ce, he, wi = e4.Check, e4.Handle, e4.WithInfo
+	is         = errors.Is
+	as         = errors.As
 )
