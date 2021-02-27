@@ -19,4 +19,6 @@ func main() {
 		start()
 	})
 
+	select {}
+
 }

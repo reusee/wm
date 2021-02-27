@@ -2,10 +2,15 @@ package main
 
 type Start func()
 
-func (_ Def) Start() Start {
+func (_ Def) Start(
+	rootWin XRootWindow,
+) Start {
 	return func() {
 
-		pt("start\n")
+		pt("starting\n")
 
+		pt("root win: %v\n", rootWin)
+
+		pt("started\n")
 	}
 }

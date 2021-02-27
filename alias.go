@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/reusee/dscope"
+	"github.com/reusee/e4"
 )
 
 type (
@@ -13,5 +14,6 @@ type (
 )
 
 var (
-	pt = fmt.Printf
+	pt     = fmt.Printf
+	ce, he = e4.Check, e4.Handle
 )

@@ -1,3 +1,5 @@
+github.com/jezek/xgb v0.0.0-20210121230032-cec22bda1ce1 h1:PfWseRCw8CuibmqANiYO1Ln5yHm6NfVGAQaGGvuPjH0=
+github.com/jezek/xgb v0.0.0-20210121230032-cec22bda1ce1/go.mod h1:3P4UH/k22rXyHIJD2w4h2XMqPX4Of/eySEZq9L6wqc4=
 github.com/reusee/dscope v0.0.0-20210225155339-cf1a53b4c757 h1:3WcGsdCSscVKzIYo6FueHZvOdPnvjcksiCdh5FZ6Jo8=
 github.com/reusee/dscope v0.0.0-20210225155339-cf1a53b4c757/go.mod h1:VKlvkUcHsW9T2FVIA/oGFDlk3hBKZUICZVb1DewhbX4=
 github.com/reusee/e4 v0.0.0-20210220140921-dc464f80154d h1:80udcaleEUxseaYwKX75nw4ENd25wwUufvXNVXyUbYU=
