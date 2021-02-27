@@ -7,6 +7,7 @@ func (_ Def) Start(
 	internAtoms InternAtoms,
 	setupAllDesktop SetupAllDesktop,
 	setupKeyboard SetupKeyboard,
+	manageExisting ManageExistingWindows,
 ) Start {
 	return func() {
 
@@ -16,6 +17,7 @@ func (_ Def) Start(
 		internAtoms()
 		setupAllDesktop()
 		setupKeyboard()
+		manageExisting()
 
 		pt("started\n")
 
