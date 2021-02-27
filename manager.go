@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
@@ -39,7 +41,8 @@ func (_ Def) ManageWindow(
 		}
 
 		win := &Window{
-			XID: id,
+			XID:       id,
+			LastFocus: time.Now(),
 		}
 		winsMap[id] = win
 		update(&winsMap)
