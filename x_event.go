@@ -92,10 +92,16 @@ func (_ Def) SetupEventHandler(
 					case xproto.EnterNotifyEvent:
 						cur.Call(func(
 							wins WindowsMap,
+							conn *xgb.Conn,
 						) {
+							// update LastFocus
 							if w, ok := wins[ev.Event]; ok {
 								w.LastFocus = time.Now()
 							}
+							// focus pointer root
+							ce(xproto.SetInputFocusChecked(
+								conn, 0, xproto.InputFocusPointerRoot, 0,
+							).Check())
 						})
 
 					case xproto.CreateNotifyEvent:
