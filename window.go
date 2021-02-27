@@ -1,9 +1,9 @@
 package main
 
 import (
-	"sort"
 	"time"
 
+	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
 
@@ -13,23 +13,89 @@ type Window struct {
 	LastKey   time.Time
 }
 
-type WindowsSorter struct {
-	windows []*Window
-	less    func(i, j int) bool
-	swap    func(i, j int)
+type WindowsMap = map[xproto.Window]*Window
+
+func (_ Def) WindowsMap() WindowsMap {
+	return make(WindowsMap)
 }
 
-var _ sort.Interface = WindowsSorter{}
+type GetWindowsArray func() []*Window
 
-func (s WindowsSorter) Len() int {
-	return len(s.windows)
+func (_ Def) WindowsArray(
+	m WindowsMap,
+) GetWindowsArray {
+	return func() []*Window {
+		var array []*Window
+		for _, win := range m {
+			array = append(array, win)
+		}
+		return array
+	}
 }
 
-func (s WindowsSorter) Less(i, j int) bool {
-	return s.less(i, j)
+type ManageWindow func(xproto.Window)
+
+type UnmanageWindow func(xproto.Window)
+
+func (_ Def) ManageWindow(
+	conn *xgb.Conn,
+	winsMap WindowsMap,
+	update Update,
+) (
+	manage ManageWindow,
+	unmanage UnmanageWindow,
+) {
+
+	manage = func(id xproto.Window) {
+		if _, ok := winsMap[id]; ok {
+			return
+		}
+
+		win := &Window{
+			XID:       id,
+			LastFocus: time.Now(),
+		}
+		winsMap[id] = win
+		update(&winsMap)
+	}
+
+	unmanage = func(win xproto.Window) {
+		delete(winsMap, win)
+		update(&winsMap)
+	}
+
+	return
 }
 
-func (s WindowsSorter) Swap(i, j int) {
-	s.swap(i, j)
-	s.windows[i], s.windows[j] = s.windows[j], s.windows[i]
+type ManageExistingWindows func()
+
+func (_ Def) ManageExistingWindows(
+	setupInfo *xproto.SetupInfo,
+	conn *xgb.Conn,
+	desktopWins DesktopWindows,
+	manage ManageWindow,
+) ManageExistingWindows {
+	return func() {
+
+		for _, screen := range setupInfo.Roots {
+			tree, err := xproto.QueryTree(conn, screen.Root).Reply()
+			ce(err)
+			if tree != nil {
+				for _, win := range tree.Children {
+					if win == desktopWins[screen.Root] {
+						continue
+					}
+					attrs, err := xproto.GetWindowAttributes(conn, win).Reply()
+					if attrs == nil || err != nil {
+						continue
+					}
+					if attrs.OverrideRedirect || attrs.MapState == xproto.MapStateUnmapped {
+						continue
+					}
+					manage(win)
+				}
+			}
+		}
+
+	}
 }

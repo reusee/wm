@@ -14,7 +14,7 @@ func (_ Def) SetupMouse(
 	return func() {
 
 		for _, screen := range setup.Roots {
-			// async grab all buttons
+			// grab all buttons
 			ce(xproto.GrabButtonChecked(
 				conn,
 				true,
