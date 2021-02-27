@@ -19,11 +19,16 @@ func (_ Def) BecomeWM(
 			err := xproto.ChangeWindowAttributesChecked(
 				conn, screen.Root, xproto.CwEventMask,
 				[]uint32{
-					xproto.EventMaskButtonPress |
-						xproto.EventMaskButtonRelease |
-						xproto.EventMaskPointerMotion |
+					0 |
 						xproto.EventMaskStructureNotify |
-						xproto.EventMaskSubstructureRedirect,
+						xproto.EventMaskSubstructureRedirect |
+						xproto.EventMaskPropertyChange |
+						xproto.EventMaskButtonPress |
+						xproto.EventMaskButtonRelease |
+						//xproto.EventMaskPointerMotion |
+						//xproto.EventMaskKeyPress |
+						//xproto.EventMaskKeyRelease |
+						0,
 				},
 			).Check()
 			var accessError xproto.AccessError

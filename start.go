@@ -1,5 +1,7 @@
 package main
 
+import "os/exec"
+
 type Start func()
 
 func (_ Def) Start(
@@ -8,6 +10,7 @@ func (_ Def) Start(
 	setupAllDesktop SetupAllDesktop,
 	setupKeyboard SetupKeyboard,
 	manageExisting ManageExistingWindows,
+	setupEventHandler SetupEventHandler,
 ) Start {
 	return func() {
 
@@ -18,6 +21,9 @@ func (_ Def) Start(
 		setupAllDesktop()
 		setupKeyboard()
 		manageExisting()
+		setupEventHandler()
+
+		ce(exec.Command("terminal").Start())
 
 		pt("started\n")
 
