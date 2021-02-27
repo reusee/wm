@@ -5,23 +5,46 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
+func (_ Def) WindowsMap() map[xproto.Window]*Window {
+	return make(map[xproto.Window]*Window)
+}
+
+func (_ Def) WindowsArray(
+	m map[xproto.Window]*Window,
+) (array []*Window) {
+	for _, win := range m {
+		array = append(array, win)
+	}
+	return
+}
+
 type ManageWindow func(xproto.Window)
 
 type UnmanageWindow func(xproto.Window)
 
 func (_ Def) ManageWindow(
 	conn *xgb.Conn,
+	winsMap map[xproto.Window]*Window,
+	update Update,
 ) (
 	manage ManageWindow,
 	unmanage UnmanageWindow,
 ) {
 
-	manage = func(win xproto.Window) {
-		pt("manage %v\n", win)
+	manage = func(id xproto.Window) {
+		if _, ok := winsMap[id]; ok {
+			return
+		}
+		win := &Window{
+			XID: id,
+		}
+		winsMap[id] = win
+		update(&winsMap)
 	}
 
 	unmanage = func(win xproto.Window) {
-		pt("unmanage %v\n", win)
+		delete(winsMap, win)
+		update(&winsMap)
 	}
 
 	return
