@@ -7,13 +7,17 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-type StackByLastFocus func()
+type StackWindows func(
+	less func(windows []*Window, i, j int) bool,
+)
 
 func (def Def) StackByFocus(
 	get GetWindowsArray,
 	conn *xgb.Conn,
-) StackByLastFocus {
-	return func() {
+) StackWindows {
+	return func(
+		less func(windows []*Window, i, j int) bool,
+	) {
 
 		windows := get()
 		if len(windows) < 2 {
@@ -21,7 +25,7 @@ func (def Def) StackByFocus(
 		}
 
 		sort.SliceStable(windows, func(i, j int) bool {
-			return windows[i].LastFocus.Before(windows[j].LastFocus)
+			return less(windows, i, j)
 		})
 
 		for i, win := range windows {
@@ -40,4 +44,13 @@ func (def Def) StackByFocus(
 		}
 
 	}
+}
+
+func byInteractTime(windows []*Window, i, j int) bool {
+	a := windows[i]
+	b := windows[j]
+	if !a.LastKey.Equal(b.LastKey) {
+		return a.LastKey.Before(b.LastKey)
+	}
+	return a.LastFocus.Before(b.LastFocus)
 }

@@ -67,33 +67,33 @@ func (_ Def) SetupEventHandler(
 							xproto.CwEventMask,
 							[]uint32{
 								xproto.EventMaskPropertyChange |
-									xproto.EventMaskEnterWindow,
+									xproto.EventMaskEnterWindow |
+									xproto.EventMaskButtonPress |
+									xproto.EventMaskButtonRelease,
 							},
 						).Check())
 
 						// manage
 						cur.Call(func(
 							manage ManageWindow,
-							stack StackByLastFocus,
+							stack StackWindows,
 						) {
 							manage(ev.Window)
-							stack()
+							stack(byInteractTime)
 						})
 
 					case xproto.UnmapNotifyEvent:
 						cur.Call(func(
 							unmanage UnmanageWindow,
-							stack StackByLastFocus,
+							stack StackWindows,
 						) {
 							unmanage(ev.Window)
-							stack()
+							stack(byInteractTime)
 						})
 
 					case xproto.EnterNotifyEvent:
 						cur.Call(func(
 							wins WindowsMap,
-							conn *xgb.Conn,
-							stack StackByLastFocus,
 						) {
 							// update LastFocus
 							if w, ok := wins[ev.Event]; ok {
@@ -103,8 +103,20 @@ func (_ Def) SetupEventHandler(
 							ce(xproto.SetInputFocusChecked(
 								conn, 0, xproto.InputFocusPointerRoot, 0,
 							).Check())
+						})
+
+					case xproto.ButtonPressEvent:
+						pt("%v\n", ev)
+						cur.Call(func(
+							wins WindowsMap,
+							stack StackWindows,
+						) {
+							// update LastKey
+							if w, ok := wins[ev.Event]; ok {
+								w.LastKey = time.Now()
+							}
 							// stack
-							stack()
+							stack(byInteractTime)
 						})
 
 					case xproto.CreateNotifyEvent:

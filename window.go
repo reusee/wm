@@ -10,6 +10,7 @@ import (
 type Window struct {
 	XID       xproto.Window
 	LastFocus time.Time
+	LastKey   time.Time
 }
 
 type WindowsSorter struct {
