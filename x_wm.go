@@ -20,14 +20,15 @@ func (_ Def) BecomeWM(
 				conn, screen.Root, xproto.CwEventMask,
 				[]uint32{
 					0 |
-						xproto.EventMaskStructureNotify |
-						xproto.EventMaskSubstructureRedirect |
-						xproto.EventMaskPropertyChange |
-						xproto.EventMaskButtonPress |
-						xproto.EventMaskButtonRelease |
-						//xproto.EventMaskPointerMotion |
+						//xproto.EventMaskButtonPress |
+						//xproto.EventMaskButtonRelease |
 						//xproto.EventMaskKeyPress |
 						//xproto.EventMaskKeyRelease |
+						//xproto.EventMaskPointerMotion |
+						xproto.EventMaskPropertyChange |
+						xproto.EventMaskStructureNotify |
+						xproto.EventMaskSubstructureNotify |
+						xproto.EventMaskSubstructureRedirect |
 						0,
 				},
 			).Check()

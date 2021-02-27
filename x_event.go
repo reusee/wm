@@ -9,6 +9,8 @@ type SetupEventHandler func()
 
 func (_ Def) SetupEventHandler(
 	conn *xgb.Conn,
+	manage ManageWindow,
+	unmanage UnmanageWindow,
 ) SetupEventHandler {
 	return func() {
 
@@ -25,17 +27,8 @@ func (_ Def) SetupEventHandler(
 				}
 
 				if ev != nil {
-					switch ev := ev.(type) {
 
-					case xproto.CreateNotifyEvent:
-						ce(xproto.ChangeWindowAttributesChecked(
-							conn, ev.Window,
-							xproto.CwEventMask,
-							[]uint32{
-								xproto.EventMaskPropertyChange,
-							},
-						).Check())
-						//TODO
+					switch ev := ev.(type) {
 
 					case xproto.ConfigureRequestEvent:
 						var vals []uint32
@@ -62,19 +55,29 @@ func (_ Def) SetupEventHandler(
 							vals = append(vals, uint32(ev.StackMode))
 						}
 						xproto.ConfigureWindow(conn, ev.Window, flags, vals)
-						//TODO
 
 					case xproto.MapRequestEvent:
 						xproto.MapWindow(conn, ev.Window)
-						//TODO
+						ce(xproto.ChangeWindowAttributesChecked(
+							conn, ev.Window,
+							xproto.CwEventMask,
+							[]uint32{
+								xproto.EventMaskPropertyChange,
+							},
+						).Check())
+						manage(ev.Window)
 
+					case xproto.UnmapNotifyEvent:
+						unmanage(ev.Window)
+
+					case xproto.CreateNotifyEvent:
 					case xproto.PropertyNotifyEvent:
-						//TODO
-
 					case xproto.ExposeEvent:
 					case xproto.ConfigureNotifyEvent:
 					case xproto.ClientMessageEvent:
 					case xproto.MapNotifyEvent:
+					case xproto.MappingNotifyEvent:
+					case xproto.DestroyNotifyEvent:
 
 					default:
 						pt("EVENT-> %v\n", ev)

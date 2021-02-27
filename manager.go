@@ -7,13 +7,24 @@ import (
 
 type ManageWindow func(xproto.Window)
 
-func (_ Def) ManageWindow() ManageWindow {
-	return func(
-		win xproto.Window,
-	) {
+type UnmanageWindow func(xproto.Window)
+
+func (_ Def) ManageWindow(
+	conn *xgb.Conn,
+) (
+	manage ManageWindow,
+	unmanage UnmanageWindow,
+) {
+
+	manage = func(win xproto.Window) {
 		pt("manage %v\n", win)
-		//TODO
 	}
+
+	unmanage = func(win xproto.Window) {
+		pt("unmanage %v\n", win)
+	}
+
+	return
 }
 
 type ManageExistingWindows func()
