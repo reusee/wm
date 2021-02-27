@@ -67,9 +67,7 @@ func (_ Def) SetupEventHandler(
 							xproto.CwEventMask,
 							[]uint32{
 								xproto.EventMaskPropertyChange |
-									xproto.EventMaskEnterWindow |
-									xproto.EventMaskButtonPress |
-									xproto.EventMaskButtonRelease,
+									xproto.EventMaskEnterWindow,
 							},
 						).Check())
 
@@ -106,10 +104,10 @@ func (_ Def) SetupEventHandler(
 						})
 
 					case xproto.ButtonPressEvent:
-						pt("%v\n", ev)
 						cur.Call(func(
 							wins WindowsMap,
 							stack StackWindows,
+							conn *xgb.Conn,
 						) {
 							// update LastKey
 							if w, ok := wins[ev.Event]; ok {
@@ -117,6 +115,18 @@ func (_ Def) SetupEventHandler(
 							}
 							// stack
 							stack(byInteractTime)
+							// allow events
+							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayPointer, ev.Time).Check())
+							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayKeyboard, ev.Time).Check())
+						})
+
+					case xproto.ButtonReleaseEvent:
+						cur.Call(func(
+							conn *xgb.Conn,
+						) {
+							// allow events
+							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayPointer, ev.Time).Check())
+							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayKeyboard, ev.Time).Check())
 						})
 
 					case xproto.CreateNotifyEvent:

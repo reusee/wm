@@ -21,8 +21,8 @@ func (_ Def) SetupMouse(
 				screen.Root,
 				xproto.EventMaskButtonPress|
 					xproto.EventMaskButtonRelease,
-				xproto.GrabModeAsync,
-				xproto.GrabModeAsync,
+				xproto.GrabModeSync,
+				xproto.GrabModeSync,
 				xproto.WindowNone,
 				xproto.CursorNone,
 				xproto.ButtonIndexAny,
