@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
@@ -56,14 +58,20 @@ func (_ Def) SetupEventHandler(
 						xproto.ConfigureWindow(conn, ev.Window, flags, vals)
 
 					case xproto.MapRequestEvent:
+						// map
 						xproto.MapWindow(conn, ev.Window)
+
+						// set event mark
 						ce(xproto.ChangeWindowAttributesChecked(
 							conn, ev.Window,
 							xproto.CwEventMask,
 							[]uint32{
-								xproto.EventMaskPropertyChange,
+								xproto.EventMaskPropertyChange |
+									xproto.EventMaskEnterWindow,
 							},
 						).Check())
+
+						// manage
 						cur.Call(func(
 							manage ManageWindow,
 							stack StackByLastFocus,
@@ -79,6 +87,15 @@ func (_ Def) SetupEventHandler(
 						) {
 							unmanage(ev.Window)
 							stack()
+						})
+
+					case xproto.EnterNotifyEvent:
+						cur.Call(func(
+							wins WindowsMap,
+						) {
+							if w, ok := wins[ev.Event]; ok {
+								w.LastFocus = time.Now()
+							}
 						})
 
 					case xproto.CreateNotifyEvent:
