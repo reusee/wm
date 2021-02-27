@@ -1,5 +1,7 @@
 package main
 
+import "os"
+
 func main() {
 
 	scope := NewScope()
@@ -16,9 +18,14 @@ func main() {
 	scope.Call(func(
 		start Start,
 	) {
+		var err error
+		defer he(&err, func(prev error) error {
+			pt("%s\n", prev.Error())
+			os.Exit(-1)
+			return prev
+		})
 		start()
+		select {}
 	})
-
-	select {}
 
 }

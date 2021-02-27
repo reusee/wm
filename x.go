@@ -22,7 +22,7 @@ func (_ Def) X() (
 
 	xSetupInfo = xproto.Setup(xConn)
 	if n := len(xSetupInfo.Roots); n != 1 {
-		throw(fmt.Errorf("too many roots: %d", n))
+		ce(fmt.Errorf("too many roots: %d", n))
 	}
 
 	xRootWindow = xSetupInfo.Roots[0].Root
@@ -49,7 +49,7 @@ func (_ Def) BecomeWM(
 		).Check()
 		var accessError xproto.AccessError
 		if as(err, &accessError) {
-			throw(fmt.Errorf("could not become the window manager"))
+			ce(fmt.Errorf("could not become the window manager"))
 		}
 		ce(err)
 	}
