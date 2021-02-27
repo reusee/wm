@@ -5,6 +5,7 @@ type Start func()
 func (_ Def) Start(
 	becomeWM BecomeWM,
 	internAtoms InternAtoms,
+	setupDesktop SetupDesktop,
 ) Start {
 	return func() {
 
@@ -12,6 +13,7 @@ func (_ Def) Start(
 
 		becomeWM()
 		internAtoms()
+		setupDesktop()
 
 		pt("started\n")
 

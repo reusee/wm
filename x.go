@@ -11,6 +11,7 @@ import (
 func (_ Def) X() (
 	xConn *xgb.Conn,
 	xSetupInfo *xproto.SetupInfo,
+	xScreenInfo xproto.ScreenInfo,
 	xRootWindow xproto.Window,
 ) {
 	var err error
@@ -25,7 +26,8 @@ func (_ Def) X() (
 		ce(fmt.Errorf("too many roots: %d", n))
 	}
 
-	xRootWindow = xSetupInfo.Roots[0].Root
+	xScreenInfo = xSetupInfo.Roots[0]
+	xRootWindow = xScreenInfo.Root
 
 	return
 }
