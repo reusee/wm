@@ -5,12 +5,14 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-func (_ Def) WindowsMap() map[xproto.Window]*Window {
-	return make(map[xproto.Window]*Window)
+type WindowsMap = map[xproto.Window]*Window
+
+func (_ Def) WindowsMap() WindowsMap {
+	return make(WindowsMap)
 }
 
 func (_ Def) WindowsArray(
-	m map[xproto.Window]*Window,
+	m WindowsMap,
 ) (array []*Window) {
 	for _, win := range m {
 		array = append(array, win)
@@ -24,7 +26,7 @@ type UnmanageWindow func(xproto.Window)
 
 func (_ Def) ManageWindow(
 	conn *xgb.Conn,
-	winsMap map[xproto.Window]*Window,
+	winsMap WindowsMap,
 	update Update,
 ) (
 	manage ManageWindow,
@@ -35,6 +37,7 @@ func (_ Def) ManageWindow(
 		if _, ok := winsMap[id]; ok {
 			return
 		}
+
 		win := &Window{
 			XID: id,
 		}
