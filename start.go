@@ -11,6 +11,7 @@ func (_ Def) Start(
 	setupKeyboard SetupKeyboard,
 	manageExisting ManageExistingWindows,
 	setupEventHandler SetupEventHandler,
+	setupMouse SetupMouse,
 ) Start {
 	return func() {
 
@@ -20,6 +21,7 @@ func (_ Def) Start(
 		internAtoms()
 		setupAllDesktop()
 		setupKeyboard()
+		setupMouse()
 		manageExisting()
 		setupEventHandler()
 
