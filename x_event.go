@@ -109,9 +109,9 @@ func (_ Def) SetupEventHandler(
 							relayout Relayout,
 							conn *xgb.Conn,
 						) {
-							// update LastKey
+							// update LastRaise
 							if w, ok := wins[ev.Event]; ok {
-								w.LastKey = time.Now()
+								w.LastRaise = time.Now()
 							}
 							// relayout
 							relayout()

@@ -23,8 +23,8 @@ func (def Def) StackByFocus(
 		sort.SliceStable(windows, func(i, j int) bool {
 			a := windows[i]
 			b := windows[j]
-			if !a.LastKey.Equal(b.LastKey) {
-				return a.LastKey.Before(b.LastKey)
+			if !a.LastRaise.Equal(b.LastRaise) {
+				return a.LastRaise.Before(b.LastRaise)
 			}
 			return a.LastFocus.Before(b.LastFocus)
 		})

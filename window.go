@@ -10,7 +10,7 @@ import (
 type Window struct {
 	XID       xproto.Window
 	LastFocus time.Time
-	LastKey   time.Time
+	LastRaise time.Time
 }
 
 type WindowsMap = map[xproto.Window]*Window
