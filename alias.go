@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/reusee/dscope"
@@ -16,4 +17,7 @@ type (
 var (
 	pt     = fmt.Printf
 	ce, he = e4.Check, e4.Handle
+	throw  = e4.Throw
+	is     = errors.Is
+	as     = errors.As
 )

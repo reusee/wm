@@ -3,13 +3,13 @@ package main
 type Start func()
 
 func (_ Def) Start(
-	rootWin XRootWindow,
+	becomeWM BecomeWM,
 ) Start {
 	return func() {
 
 		pt("starting\n")
 
-		pt("root win: %v\n", rootWin)
+		becomeWM()
 
 		pt("started\n")
 	}

@@ -6,40 +6,51 @@ import (
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xinerama"
 	"github.com/jezek/xgb/xproto"
-	"github.com/reusee/e4"
 )
 
-type XConn struct {
-	*xgb.Conn
-}
-
-type XSetupInfo struct {
-	*xproto.SetupInfo
-}
-
-type XRootWindow struct {
-	xproto.Window
-}
-
 func (_ Def) X() (
-	xConn XConn,
-	xSetupInfo XSetupInfo,
-	xRootWindow XRootWindow,
+	xConn *xgb.Conn,
+	xSetupInfo *xproto.SetupInfo,
+	xRootWindow xproto.Window,
 ) {
+	var err error
 
-	conn, err := xgb.NewConn()
+	xConn, err = xgb.NewConn()
 	ce(err)
-	xConn.Conn = conn
 
-	ce(xinerama.Init(conn))
+	ce(xinerama.Init(xConn))
 
-	setupInfo := xproto.Setup(conn)
-	if n := len(setupInfo.Roots); n != 1 {
-		e4.Throw(fmt.Errorf("too many roots: %d", n))
+	xSetupInfo = xproto.Setup(xConn)
+	if n := len(xSetupInfo.Roots); n != 1 {
+		throw(fmt.Errorf("too many roots: %d", n))
 	}
-	xSetupInfo.SetupInfo = setupInfo
 
-	xRootWindow.Window = setupInfo.Roots[0].Root
+	xRootWindow = xSetupInfo.Roots[0].Root
 
 	return
+}
+
+type BecomeWM func()
+
+func (_ Def) BecomeWM(
+	conn *xgb.Conn,
+	rootWin xproto.Window,
+) BecomeWM {
+	return func() {
+		err := xproto.ChangeWindowAttributesChecked(
+			conn, rootWin, xproto.CwEventMask,
+			[]uint32{
+				xproto.EventMaskButtonPress |
+					xproto.EventMaskButtonRelease |
+					xproto.EventMaskPointerMotion |
+					xproto.EventMaskStructureNotify |
+					xproto.EventMaskSubstructureRedirect,
+			},
+		).Check()
+		var accessError xproto.AccessError
+		if as(err, &accessError) {
+			throw(fmt.Errorf("could not become the window manager"))
+		}
+		ce(err)
+	}
 }
