@@ -93,6 +93,7 @@ func (_ Def) SetupEventHandler(
 						cur.Call(func(
 							wins WindowsMap,
 							conn *xgb.Conn,
+							stack StackByLastFocus,
 						) {
 							// update LastFocus
 							if w, ok := wins[ev.Event]; ok {
@@ -102,6 +103,8 @@ func (_ Def) SetupEventHandler(
 							ce(xproto.SetInputFocusChecked(
 								conn, 0, xproto.InputFocusPointerRoot, 0,
 							).Check())
+							// stack
+							stack()
 						})
 
 					case xproto.CreateNotifyEvent:

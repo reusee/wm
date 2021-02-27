@@ -14,7 +14,6 @@ func (def Def) StackByFocus(
 	conn *xgb.Conn,
 ) StackByLastFocus {
 	return func() {
-		pt("sort\n")
 
 		windows := get()
 		if len(windows) < 2 {
@@ -26,7 +25,6 @@ func (def Def) StackByFocus(
 		})
 
 		for i, win := range windows {
-			pt("%v\n", win)
 			if i > 0 {
 				prev := windows[i-1] // prev
 				ce(xproto.ConfigureWindowChecked(
