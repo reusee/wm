@@ -11,6 +11,7 @@ type Window struct {
 	XID       xproto.Window
 	LastFocus time.Time
 	LastRaise time.Time
+	Layer     int
 }
 
 type WindowsMap = map[xproto.Window]*Window
