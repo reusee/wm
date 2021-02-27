@@ -9,8 +9,7 @@ type SetupEventHandler func()
 
 func (_ Def) SetupEventHandler(
 	conn *xgb.Conn,
-	manage ManageWindow,
-	unmanage UnmanageWindow,
+	cur *Scope,
 ) SetupEventHandler {
 	return func() {
 
@@ -65,10 +64,18 @@ func (_ Def) SetupEventHandler(
 								xproto.EventMaskPropertyChange,
 							},
 						).Check())
-						manage(ev.Window)
+						cur.Call(func(
+							manage ManageWindow,
+						) {
+							manage(ev.Window)
+						})
 
 					case xproto.UnmapNotifyEvent:
-						unmanage(ev.Window)
+						cur.Call(func(
+							unmanage UnmanageWindow,
+						) {
+							unmanage(ev.Window)
+						})
 
 					case xproto.CreateNotifyEvent:
 					case xproto.PropertyNotifyEvent:

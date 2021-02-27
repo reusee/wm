@@ -11,3 +11,10 @@ func NewScope() Scope {
 }
 
 type Update func(decls ...any) Scope
+
+func (_ Def) ToBeImplement() (
+	_ Update,
+	_ *Scope,
+) {
+	panic("these should be implemented")
+}
