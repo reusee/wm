@@ -12,6 +12,7 @@ type Window struct {
 	LastFocus time.Time
 	LastRaise time.Time
 	Layer     int
+	Tags      map[Tag]bool
 }
 
 type WindowsMap = map[xproto.Window]*Window
