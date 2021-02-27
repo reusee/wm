@@ -6,6 +6,7 @@ func (_ Def) Start(
 	becomeWM BecomeWM,
 	internAtoms InternAtoms,
 	setupAllDesktop SetupAllDesktop,
+	setupKeyboard SetupKeyboard,
 ) Start {
 	return func() {
 
@@ -14,6 +15,7 @@ func (_ Def) Start(
 		becomeWM()
 		internAtoms()
 		setupAllDesktop()
+		setupKeyboard()
 
 		pt("started\n")
 
