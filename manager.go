@@ -13,13 +13,18 @@ func (_ Def) WindowsMap() WindowsMap {
 	return make(WindowsMap)
 }
 
+type GetWindowsArray func() []*Window
+
 func (_ Def) WindowsArray(
 	m WindowsMap,
-) (array []*Window) {
-	for _, win := range m {
-		array = append(array, win)
+) GetWindowsArray {
+	return func() []*Window {
+		var array []*Window
+		for _, win := range m {
+			array = append(array, win)
+		}
+		return array
 	}
-	return
 }
 
 type ManageWindow func(xproto.Window)

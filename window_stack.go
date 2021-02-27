@@ -7,13 +7,12 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-type AdjustWindow func(i, j int)
+type AdjustWindow func(windows []*Window, i, j int)
 
 func (def Def) AdjustWindow(
-	windows []*Window,
 	conn *xgb.Conn,
 ) AdjustWindow {
-	return func(i, j int) {
+	return func(windows []*Window, i, j int) {
 		if j == 0 {
 			// below next
 			sibling := windows[1].XID
@@ -66,12 +65,13 @@ func (def Def) AdjustWindow(
 type StackByLastFocus func()
 
 func (def Def) StackByFocus(
-	windows []*Window,
+	get GetWindowsArray,
 	update Update,
 	adjust AdjustWindow,
 ) StackByLastFocus {
 	return func() {
 
+		windows := get()
 		if len(windows) < 2 {
 			return
 		}
@@ -84,8 +84,8 @@ func (def Def) StackByFocus(
 			},
 			swap: func(i, j int) {
 				updated = true
-				adjust(i, j)
-				adjust(j, i)
+				adjust(windows, i, j)
+				adjust(windows, j, i)
 			},
 		})
 		if updated {
