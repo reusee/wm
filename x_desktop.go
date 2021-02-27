@@ -5,14 +5,27 @@ import (
 	"github.com/jezek/xgb/xproto"
 )
 
-type SetupDesktop func()
+type SetupAllDesktop func()
 
-func (_ Def) SetupDeskTop(
-	desktopWin DesktopXWindow,
-) SetupDesktop {
+func (_ Def) SetupAllDesktop(
+	wins DesktopWindows,
+) SetupAllDesktop {
 	return func() {
-
+		_ = wins
 	}
+}
+
+type DesktopWindows map[xproto.Window]xproto.Window
+
+func (_ Def) DesktopWindows(
+	setupInfo *xproto.SetupInfo,
+	setup SetupDesktop,
+) DesktopWindows {
+	m := make(DesktopWindows)
+	for _, screen := range setupInfo.Roots {
+		m[screen.Root] = setup(screen)
+	}
+	return m
 }
 
 type XCursor xproto.Cursor
@@ -36,94 +49,80 @@ func (_ Def) XCursor(
 	return XCursor(cursor)
 }
 
-type DesktopXWindow xproto.Window
+type SetupDesktop func(xproto.ScreenInfo) xproto.Window
 
-type DesktopXGContext xproto.Gcontext
-
-func (_ Def) DesktopVars(
+func (_ Def) SetupDesktop(
 	conn *xgb.Conn,
-	screen xproto.ScreenInfo,
-	width DesktopWidth,
-	height DesktopHeight,
 	cursor XCursor,
-) (
-	win DesktopXWindow,
-	ctx DesktopXGContext,
-) {
+) SetupDesktop {
 
-	id, err := xproto.NewWindowId(conn)
-	ce(err)
-	win = DesktopXWindow(id)
+	return func(
+		screen xproto.ScreenInfo,
+	) (
+		win xproto.Window,
+	) {
+		var err error
 
-	gctx, err := xproto.NewGcontextId(conn)
-	ce(err)
-	ctx = DesktopXGContext(gctx)
+		win, err = xproto.NewWindowId(conn)
+		ce(err)
 
-	// TODO xsettings
+		gctx, err := xproto.NewGcontextId(conn)
+		ce(err)
 
-	ce(xproto.CreateWindowChecked(
-		conn, screen.RootDepth, id, screen.Root,
-		0, 0, uint16(width), uint16(height), 0,
-		xproto.WindowClassInputOutput,
-		screen.RootVisual,
-		xproto.CwOverrideRedirect|xproto.CwEventMask,
-		[]uint32{
-			1,
-			xproto.EventMaskExposure,
-		},
-	).Check())
+		// TODO xsettings
 
-	ce(xproto.ConfigureWindowChecked(
-		conn, id,
-		xproto.ConfigWindowStackMode,
-		[]uint32{
-			xproto.StackModeBelow,
-		},
-	).Check())
+		ce(xproto.CreateWindowChecked(
+			conn, screen.RootDepth, win, screen.Root,
+			0, 0,
+			uint16(screen.WidthInPixels),
+			uint16(screen.HeightInPixels),
+			0,
+			xproto.WindowClassInputOutput,
+			screen.RootVisual,
+			xproto.CwOverrideRedirect|xproto.CwEventMask,
+			[]uint32{
+				1,
+				xproto.EventMaskExposure,
+			},
+		).Check())
 
-	ce(xproto.ChangeWindowAttributesChecked(
-		conn, id,
-		xproto.CwBackPixel|xproto.CwCursor,
-		[]uint32{
-			screen.WhitePixel,
-			uint32(cursor),
-		},
-	).Check())
+		ce(xproto.ConfigureWindowChecked(
+			conn, win,
+			xproto.ConfigWindowStackMode,
+			[]uint32{
+				xproto.StackModeBelow,
+			},
+		).Check())
 
-	font, err := xproto.NewFontId(conn)
-	ce(err)
-	ce(xproto.OpenFontChecked(
-		conn, font,
-		uint16(len("6x13")), "6x13",
-	).Check())
-	defer xproto.CloseFont(conn, font)
+		ce(xproto.ChangeWindowAttributesChecked(
+			conn, win,
+			xproto.CwBackPixel|xproto.CwCursor,
+			[]uint32{
+				screen.WhitePixel,
+				uint32(cursor),
+			},
+		).Check())
 
-	ce(xproto.CreateGCChecked(
-		conn, gctx,
-		xproto.Drawable(screen.Root),
-		xproto.GcFont,
-		[]uint32{
-			uint32(font),
-		}).Check())
+		font, err := xproto.NewFontId(conn)
+		ce(err)
+		ce(xproto.OpenFontChecked(
+			conn, font,
+			uint16(len("6x13")), "6x13",
+		).Check())
+		defer xproto.CloseFont(conn, font)
 
-	ce(xproto.MapWindowChecked(
-		conn, id,
-	).Check())
+		ce(xproto.CreateGCChecked(
+			conn, gctx,
+			xproto.Drawable(screen.Root),
+			xproto.GcFont,
+			[]uint32{
+				uint32(font),
+			}).Check())
 
-	return
-}
+		ce(xproto.MapWindowChecked(
+			conn, win,
+		).Check())
 
-type DesktopWidth int
-
-type DesktopHeight int
-
-func (_ Def) DesktopSize(
-	info *xproto.SetupInfo,
-) (
-	w DesktopWidth,
-	h DesktopHeight,
-) {
-	w = DesktopWidth(info.Roots[0].WidthInPixels)
-	h = DesktopHeight(info.Roots[0].HeightInPixels)
-	return
+		return
+	}
 }
