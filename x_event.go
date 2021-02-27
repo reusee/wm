@@ -74,19 +74,19 @@ func (_ Def) SetupEventHandler(
 						// manage
 						cur.Call(func(
 							manage ManageWindow,
-							stack StackWindows,
+							relayout Relayout,
 						) {
 							manage(ev.Window)
-							stack(byInteractTime)
+							relayout()
 						})
 
 					case xproto.UnmapNotifyEvent:
 						cur.Call(func(
 							unmanage UnmanageWindow,
-							stack StackWindows,
+							relayout Relayout,
 						) {
 							unmanage(ev.Window)
-							stack(byInteractTime)
+							relayout()
 						})
 
 					case xproto.EnterNotifyEvent:
@@ -106,15 +106,15 @@ func (_ Def) SetupEventHandler(
 					case xproto.ButtonPressEvent:
 						cur.Call(func(
 							wins WindowsMap,
-							stack StackWindows,
+							relayout Relayout,
 							conn *xgb.Conn,
 						) {
 							// update LastKey
 							if w, ok := wins[ev.Event]; ok {
 								w.LastKey = time.Now()
 							}
-							// stack
-							stack(byInteractTime)
+							// relayout
+							relayout()
 							// allow events
 							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayPointer, ev.Time).Check())
 							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayKeyboard, ev.Time).Check())

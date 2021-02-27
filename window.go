@@ -40,7 +40,6 @@ type UnmanageWindow func(xproto.Window)
 func (_ Def) ManageWindow(
 	conn *xgb.Conn,
 	winsMap WindowsMap,
-	update Update,
 ) (
 	manage ManageWindow,
 	unmanage UnmanageWindow,
@@ -56,12 +55,10 @@ func (_ Def) ManageWindow(
 			LastFocus: time.Now(),
 		}
 		winsMap[id] = win
-		update(&winsMap)
 	}
 
 	unmanage = func(win xproto.Window) {
 		delete(winsMap, win)
-		update(&winsMap)
 	}
 
 	return
