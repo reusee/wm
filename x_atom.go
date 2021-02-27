@@ -19,18 +19,9 @@ var (
 type InternAtoms func()
 
 func (_ Def) InternAtoms(
-	xConn *xgb.Conn,
+	intern InternAtom,
 ) InternAtoms {
 	return func() {
-
-		intern := func(str string) xproto.Atom {
-			r, err := xproto.InternAtom(xConn, false, uint16(len(str)), str).Reply()
-			ce(err, wi("intern %s", str))
-			if r == nil {
-				return 0
-			}
-			return r.Atom
-		}
 
 		Atom_NET_ACTIVE_WINDOW = intern("_NET_ACTIVE_WINDOW")
 		Atom_NET_WM_NAME = intern("_NET_WM_NAME")
@@ -41,5 +32,20 @@ func (_ Def) InternAtoms(
 		AtomWM_TAKE_FOCUS = intern("WM_TAKE_FOCUS")
 		AtomWM_TRANSIENT_FOR = intern("WM_TRANSIENT_FOR")
 
+	}
+}
+
+type InternAtom func(name string) xproto.Atom
+
+func (_ Def) InternAtom(
+	conn *xgb.Conn,
+) InternAtom {
+	return func(str string) xproto.Atom {
+		r, err := xproto.InternAtom(conn, false, uint16(len(str)), str).Reply()
+		ce(err, wi("intern %s", str))
+		if r == nil {
+			return 0
+		}
+		return r.Atom
 	}
 }
