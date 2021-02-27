@@ -17,28 +17,48 @@ func (def Def) AdjustWindow(
 		if j == 0 {
 			// below next
 			sibling := windows[1].XID
-			ce(xproto.ConfigureWindowChecked(
-				conn, windows[i].XID,
-				xproto.ConfigWindowSibling|
+			if sibling == windows[i].XID {
+				ce(xproto.ConfigureWindowChecked(
+					conn, windows[i].XID,
 					xproto.ConfigWindowStackMode,
-				[]uint32{
-					uint32(sibling),
-					xproto.StackModeBelow,
-				},
-			).Check())
+					[]uint32{
+						xproto.StackModeBelow,
+					},
+				).Check())
+			} else {
+				ce(xproto.ConfigureWindowChecked(
+					conn, windows[i].XID,
+					xproto.ConfigWindowSibling|
+						xproto.ConfigWindowStackMode,
+					[]uint32{
+						uint32(sibling),
+						xproto.StackModeBelow,
+					},
+				).Check())
+			}
 
 		} else {
 			// above previous
 			sibling := windows[j-1].XID
-			ce(xproto.ConfigureWindowChecked(
-				conn, windows[i].XID,
-				xproto.ConfigWindowSibling|
+			if sibling == windows[i].XID {
+				ce(xproto.ConfigureWindowChecked(
+					conn, windows[i].XID,
 					xproto.ConfigWindowStackMode,
-				[]uint32{
-					uint32(sibling),
-					xproto.StackModeAbove,
-				},
-			).Check())
+					[]uint32{
+						xproto.StackModeAbove,
+					},
+				).Check())
+			} else {
+				ce(xproto.ConfigureWindowChecked(
+					conn, windows[i].XID,
+					xproto.ConfigWindowSibling|
+						xproto.ConfigWindowStackMode,
+					[]uint32{
+						uint32(sibling),
+						xproto.StackModeAbove,
+					},
+				).Check())
+			}
 		}
 	}
 }
