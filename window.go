@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/jezek/xgb"
@@ -156,32 +154,32 @@ func (_ Def) UpdateWindowProperty(
 		ce(err)
 
 		if len(r.Value) > 0 {
-			targetValue := reflect.ValueOf(target)
-			switch targetValue.Elem().Kind() {
-			case reflect.Uint32:
-				targetValue.Elem().SetUint(
-					uint64(xgb.Get32(r.Value)),
-				)
-			case reflect.String:
-				start := 0
-				var strs []string
-				for i, c := range r.Value {
-					if c == 0 {
-						strs = append(strs, string(r.Value[start:i]))
-						start = i + 1
-					}
-				}
-				if start < int(r.ValueLen) {
-					strs = append(strs, string(r.Value[start:]))
-				}
-				//TODO cut or join?
+			switch target := target.(type) {
+			case *uint32:
+				*target = xgb.Get32(r.Value)
+			case *string:
+				strs := getStrinsProperty(r)
 				if len(strs) > 0 {
-					targetValue.Elem().SetString(strs[0])
+					*target = strs[0]
 				}
-			default:
-				panic(fmt.Errorf("bad target type: %T", target))
+			case *[]string:
+				*target = getStrinsProperty(r)
 			}
 		}
 
 	}
+}
+
+func getStrinsProperty(r *xproto.GetPropertyReply) (strs []string) {
+	start := 0
+	for i, c := range r.Value {
+		if c == 0 {
+			strs = append(strs, string(r.Value[start:i]))
+			start = i + 1
+		}
+	}
+	if start < int(r.ValueLen) {
+		strs = append(strs, string(r.Value[start:]))
+	}
+	return
 }
