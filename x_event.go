@@ -58,8 +58,6 @@ func (_ Def) SetupEventHandler(
 						xproto.ConfigureWindow(conn, ev.Window, flags, vals)
 
 					case xproto.MapRequestEvent:
-						// map
-						xproto.MapWindow(conn, ev.Window)
 
 						// set event mark
 						ce(xproto.ChangeWindowAttributesChecked(
@@ -92,6 +90,9 @@ func (_ Def) SetupEventHandler(
 							manage(ev.Window)
 							relayout()
 						})
+
+						// map
+						xproto.MapWindow(conn, ev.Window)
 
 					case xproto.UnmapNotifyEvent:
 						cur.Call(func(
