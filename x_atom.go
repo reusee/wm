@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/jezek/xgb"
 	"github.com/jezek/xgb/xproto"
 )
@@ -47,5 +49,24 @@ func (_ Def) InternAtom(
 			return 0
 		}
 		return r.Atom
+	}
+}
+
+type AtomName func(xproto.Atom) string
+
+func (_ Def) AtomName(
+	conn *xgb.Conn,
+) AtomName {
+	var m sync.Map
+	return func(atom xproto.Atom) string {
+		v, ok := m.Load(atom)
+		if ok {
+			return v.(string)
+		}
+		r, err := xproto.GetAtomName(conn, atom).Reply()
+		ce(err)
+		name := r.Name
+		m.Store(atom, name)
+		return name
 	}
 }
