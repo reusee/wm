@@ -58,30 +58,6 @@ func (_ Def) SetupEventHandler(
 						xproto.ConfigureWindow(conn, ev.Window, flags, vals)
 
 					case xproto.MapRequestEvent:
-
-						// set event mark
-						ce(xproto.ChangeWindowAttributesChecked(
-							conn, ev.Window,
-							xproto.CwEventMask,
-							[]uint32{
-								xproto.EventMaskPropertyChange |
-									xproto.EventMaskEnterWindow,
-							},
-						).Check())
-
-						// set cursor
-						cur.Call(func(
-							cursor DefaultCursor,
-						) {
-							ce(xproto.ChangeWindowAttributesChecked(
-								conn, ev.Window,
-								xproto.CwCursor,
-								[]uint32{
-									uint32(cursor),
-								},
-							).Check())
-						})
-
 						// manage
 						cur.Call(func(
 							manage ManageWindow,
@@ -90,7 +66,6 @@ func (_ Def) SetupEventHandler(
 							manage(ev.Window)
 							relayout()
 						})
-
 						// map
 						xproto.MapWindow(conn, ev.Window)
 

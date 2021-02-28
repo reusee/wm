@@ -43,6 +43,7 @@ type UnmanageWindow func(xproto.Window)
 func (_ Def) ManageWindow(
 	conn *xgb.Conn,
 	winsMap WindowsMap,
+	cursor DefaultCursor,
 ) (
 	manage ManageWindow,
 	unmanage UnmanageWindow,
@@ -52,6 +53,25 @@ func (_ Def) ManageWindow(
 		if _, ok := winsMap[id]; ok {
 			return
 		}
+
+		// set event mark
+		ce(xproto.ChangeWindowAttributesChecked(
+			conn, id,
+			xproto.CwEventMask,
+			[]uint32{
+				xproto.EventMaskPropertyChange |
+					xproto.EventMaskEnterWindow,
+			},
+		).Check())
+
+		// set cursor
+		ce(xproto.ChangeWindowAttributesChecked(
+			conn, id,
+			xproto.CwCursor,
+			[]uint32{
+				uint32(cursor),
+			},
+		).Check())
 
 		win := &Window{
 			XID:       id,
