@@ -149,6 +149,10 @@ func (_ Def) UpdateWindowProperty(
 			atom, xproto.GetPropertyTypeAny,
 			0, 60,
 		).Reply()
+		var windowError xproto.WindowError
+		if as(err, &windowError) {
+			return
+		}
 		ce(err)
 
 		if len(r.Value) > 0 {
