@@ -70,6 +70,7 @@ func (_ Def) SetupEventHandler(
 						xproto.MapWindow(conn, ev.Window)
 
 					case xproto.UnmapNotifyEvent:
+						// unmanage
 						cur.Call(func(
 							unmanage UnmanageWindow,
 							relayout Relayout,
@@ -101,6 +102,7 @@ func (_ Def) SetupEventHandler(
 							relayout Relayout,
 							conn *xgb.Conn,
 						) {
+							// update LastRaise
 							win := wins[ev.Event]
 							for win != nil {
 								win.LastRaise = time.Now()
@@ -126,8 +128,23 @@ func (_ Def) SetupEventHandler(
 						//TODO _net_active_window
 						//TODO _net_wm_state
 
-					case xproto.CreateNotifyEvent:
 					case xproto.PropertyNotifyEvent:
+						cur.Call(func(
+							wins WindowsMap,
+							updateProperty UpdateWindowProperty,
+						) {
+							switch ev.Atom {
+
+							case Atom_NET_WM_NAME:
+								win, ok := wins[ev.Window]
+								if ok {
+									updateProperty(ev.Window, ev.Atom, &win.Name)
+								}
+
+							}
+						})
+
+					case xproto.CreateNotifyEvent:
 					case xproto.ExposeEvent:
 					case xproto.ConfigureNotifyEvent:
 					case xproto.MapNotifyEvent:

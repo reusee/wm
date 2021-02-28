@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/jezek/xgb"
@@ -14,6 +16,7 @@ type Window struct {
 	Layer        int
 	Tags         map[Tag]bool
 	TransientFor xproto.Window
+	Name         string
 }
 
 type WindowsMap = map[xproto.Window]*Window
@@ -44,6 +47,7 @@ func (_ Def) ManageWindow(
 	conn *xgb.Conn,
 	winsMap WindowsMap,
 	cursor DefaultCursor,
+	updateProperty UpdateWindowProperty,
 ) (
 	manage ManageWindow,
 	unmanage UnmanageWindow,
@@ -78,15 +82,9 @@ func (_ Def) ManageWindow(
 			LastFocus: time.Now(),
 		}
 
-		r, err := xproto.GetProperty(
-			conn, false, id,
-			AtomWM_TRANSIENT_FOR,
-			xproto.GetPropertyTypeAny, 0, 60,
-		).Reply()
-		ce(err)
-		if len(r.Value) > 0 {
-			win.TransientFor = xproto.Window(xgb.Get32(r.Value))
-		}
+		// properties
+		updateProperty(id, AtomWM_TRANSIENT_FOR, &win.TransientFor)
+		updateProperty(id, Atom_NET_WM_NAME, &win.Name)
 
 		winsMap[id] = win
 	}
@@ -125,6 +123,59 @@ func (_ Def) ManageExistingWindows(
 					}
 					manage(win)
 				}
+			}
+		}
+
+	}
+}
+
+type UpdateWindowProperty func(
+	win xproto.Window,
+	atom xproto.Atom,
+	target any,
+)
+
+func (_ Def) UpdateWindowProperty(
+	conn *xgb.Conn,
+) UpdateWindowProperty {
+	return func(
+		win xproto.Window,
+		atom xproto.Atom,
+		target any,
+	) {
+
+		r, err := xproto.GetProperty(
+			conn, false, win,
+			atom, xproto.GetPropertyTypeAny,
+			0, 60,
+		).Reply()
+		ce(err)
+
+		if len(r.Value) > 0 {
+			targetValue := reflect.ValueOf(target)
+			switch targetValue.Elem().Kind() {
+			case reflect.Uint32:
+				targetValue.Elem().SetUint(
+					uint64(xgb.Get32(r.Value)),
+				)
+			case reflect.String:
+				start := 0
+				var strs []string
+				for i, c := range r.Value {
+					if c == 0 {
+						strs = append(strs, string(r.Value[start:i]))
+						start = i + 1
+					}
+				}
+				if start < int(r.ValueLen) {
+					strs = append(strs, string(r.Value[start:]))
+				}
+				//TODO cut or join?
+				if len(strs) > 0 {
+					targetValue.Elem().SetString(strs[0])
+				}
+			default:
+				panic(fmt.Errorf("bad target type: %T", target))
 			}
 		}
 
