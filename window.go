@@ -63,6 +63,9 @@ func (_ Def) ManageWindow(
 			xproto.CwEventMask,
 			[]uint32{
 				xproto.EventMaskPropertyChange |
+					xproto.EventMaskPointerMotion |
+					xproto.EventMaskButtonPress |
+					xproto.EventMaskButtonRelease |
 					xproto.EventMaskEnterWindow,
 			},
 		).Check())

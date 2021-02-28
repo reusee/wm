@@ -57,6 +57,8 @@ func (_ Def) SetupEventHandler(
 						}
 						xproto.ConfigureWindow(conn, ev.Window, flags, vals)
 
+					case xproto.ConfigureNotifyEvent:
+
 					case xproto.MapRequestEvent:
 						// manage
 						cur.Call(func(
@@ -101,28 +103,61 @@ func (_ Def) SetupEventHandler(
 							wins WindowsMap,
 							relayout Relayout,
 							conn *xgb.Conn,
+							start StartMouseMovingWindow,
 						) {
+
 							// update LastRaise
 							win := wins[ev.Event]
 							for win != nil {
 								win.LastRaise = time.Now()
 								win = wins[win.TransientFor]
 							}
+
 							// relayout
 							relayout()
+
+							// move
+							if ev.State&(xproto.KeyButMaskMod1|
+								xproto.KeyButMaskMod2|
+								xproto.KeyButMaskMod3|
+								xproto.KeyButMaskMod4|
+								xproto.KeyButMaskMod5) > 0 && ev.Detail == 1 {
+								pt("%+v\n", ev)
+								start(ev.Event, ev.RootX, ev.RootY)
+							}
+
 							// allow events
 							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayPointer, ev.Time).Check())
 							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayKeyboard, ev.Time).Check())
+
 						})
 
 					case xproto.ButtonReleaseEvent:
 						cur.Call(func(
 							conn *xgb.Conn,
+							stop StopMouseMovingWindow,
 						) {
+
 							// allow events
 							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayPointer, ev.Time).Check())
 							ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayKeyboard, ev.Time).Check())
+
+							// end moving
+							stop()
+
 						})
+
+					case xproto.MotionNotifyEvent:
+						// moving
+						cur.Call(func(
+							move MouseMoveWindow,
+						) {
+							move(ev.RootX, ev.RootY)
+						})
+
+						// allow events
+						ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayPointer, ev.Time).Check())
+						ce(xproto.AllowEventsChecked(conn, xproto.AllowReplayKeyboard, ev.Time).Check())
 
 					case xproto.ClientMessageEvent:
 						//TODO _net_active_window
@@ -146,7 +181,6 @@ func (_ Def) SetupEventHandler(
 
 					case xproto.CreateNotifyEvent:
 					case xproto.ExposeEvent:
-					case xproto.ConfigureNotifyEvent:
 					case xproto.MapNotifyEvent:
 					case xproto.MappingNotifyEvent:
 					case xproto.DestroyNotifyEvent:
