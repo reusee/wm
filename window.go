@@ -15,6 +15,7 @@ type Window struct {
 	Tags         map[Tag]bool
 	TransientFor xproto.Window
 	Name         string
+	Class        []string
 }
 
 type WindowsMap = map[xproto.Window]*Window
@@ -83,6 +84,7 @@ func (_ Def) ManageWindow(
 		// properties
 		updateProperty(id, AtomWM_TRANSIENT_FOR, &win.TransientFor)
 		updateProperty(id, Atom_NET_WM_NAME, &win.Name)
+		updateProperty(id, AtomWM_CLASS, &win.Class)
 
 		winsMap[id] = win
 	}
