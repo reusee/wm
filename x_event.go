@@ -71,6 +71,19 @@ func (_ Def) SetupEventHandler(
 							},
 						).Check())
 
+						// set cursor
+						cur.Call(func(
+							cursor DefaultCursor,
+						) {
+							ce(xproto.ChangeWindowAttributesChecked(
+								conn, ev.Window,
+								xproto.CwCursor,
+								[]uint32{
+									uint32(cursor),
+								},
+							).Check())
+						})
+
 						// manage
 						cur.Call(func(
 							manage ManageWindow,

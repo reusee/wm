@@ -28,32 +28,11 @@ func (_ Def) DesktopWindows(
 	return m
 }
 
-type XCursor xproto.Cursor
-
-func (_ Def) XCursor(
-	conn *xgb.Conn,
-) XCursor {
-	cursorFont, err := xproto.NewFontId(conn)
-	ce(err)
-	ce(xproto.OpenFontChecked(conn, cursorFont, uint16(len("cursor")), "cursor").Check())
-	cursor, err := xproto.NewCursorId(conn)
-	ce(err)
-	const leftPtr = 80
-	ce(xproto.CreateGlyphCursorChecked(conn,
-		cursor, cursorFont, cursorFont,
-		leftPtr, leftPtr+1,
-		0xffff, 0xffff, 0xffff,
-		0, 0, 0,
-	).Check())
-	ce(xproto.CloseFontChecked(conn, cursorFont).Check())
-	return XCursor(cursor)
-}
-
 type SetupDesktop func(xproto.ScreenInfo) xproto.Window
 
 func (_ Def) SetupDesktop(
 	conn *xgb.Conn,
-	cursor XCursor,
+	cursor DefaultCursor,
 ) SetupDesktop {
 
 	return func(
