@@ -12,6 +12,7 @@ type StackWindows func() []*Window
 func (def Def) StackByFocus(
 	get GetWindowsArray,
 	conn *xgb.Conn,
+	winsMap WindowsMap,
 ) StackWindows {
 	return func() []*Window {
 
@@ -22,7 +23,23 @@ func (def Def) StackByFocus(
 
 		sort.SliceStable(windows, func(i, j int) bool {
 			a := windows[i]
+			aID := a.XID
+			if a.TransientFor > 0 {
+				if w, ok := winsMap[a.TransientFor]; ok {
+					a = w
+				}
+			}
 			b := windows[j]
+			bID := b.XID
+			if b.TransientFor > 0 {
+				if w, ok := winsMap[b.TransientFor]; ok {
+					b = w
+				}
+			}
+			if a.XID == b.XID {
+				// same transient group
+				return aID < bID
+			}
 			if a.Layer != b.Layer {
 				return a.Layer < b.Layer
 			}

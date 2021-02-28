@@ -94,8 +94,11 @@ func (_ Def) SetupEventHandler(
 							wins WindowsMap,
 						) {
 							// update LastFocus
-							if w, ok := wins[ev.Event]; ok {
-								w.LastFocus = time.Now()
+							win := wins[ev.Event]
+							now := time.Now()
+							for win != nil {
+								win.LastFocus = now
+								win = wins[win.TransientFor]
 							}
 							// focus pointer root
 							ce(xproto.SetInputFocusChecked(
@@ -109,9 +112,10 @@ func (_ Def) SetupEventHandler(
 							relayout Relayout,
 							conn *xgb.Conn,
 						) {
-							// update LastRaise
-							if w, ok := wins[ev.Event]; ok {
-								w.LastRaise = time.Now()
+							win := wins[ev.Event]
+							for win != nil {
+								win.LastRaise = time.Now()
+								win = wins[win.TransientFor]
 							}
 							// relayout
 							relayout()

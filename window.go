@@ -8,11 +8,12 @@ import (
 )
 
 type Window struct {
-	XID       xproto.Window
-	LastFocus time.Time
-	LastRaise time.Time
-	Layer     int
-	Tags      map[Tag]bool
+	XID          xproto.Window
+	LastFocus    time.Time
+	LastRaise    time.Time
+	Layer        int
+	Tags         map[Tag]bool
+	TransientFor xproto.Window
 }
 
 type WindowsMap = map[xproto.Window]*Window
@@ -56,6 +57,17 @@ func (_ Def) ManageWindow(
 			XID:       id,
 			LastFocus: time.Now(),
 		}
+
+		r, err := xproto.GetProperty(
+			conn, false, id,
+			AtomWM_TRANSIENT_FOR,
+			xproto.GetPropertyTypeAny, 0, 60,
+		).Reply()
+		ce(err)
+		if len(r.Value) > 0 {
+			win.TransientFor = xproto.Window(xgb.Get32(r.Value))
+		}
+
 		winsMap[id] = win
 	}
 
