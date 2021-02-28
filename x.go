@@ -15,6 +15,10 @@ func (_ Def) X() (
 	conn, err = xgb.NewConn()
 	ce(err)
 
+	//TODO ewmh
+	//TODO randr
+	//TODO icccm
+
 	ce(xinerama.Init(conn))
 
 	setupInfo = xproto.Setup(conn)
