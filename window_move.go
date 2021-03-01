@@ -67,15 +67,15 @@ func (_ Def) MouseMovingWindow(
 			return
 		}
 		pt("delta %d %d\n", deltaX, deltaY)
-		r, err := xproto.GetGeometry(conn, xproto.Drawable(moving)).Reply()
+		geom, err := xproto.GetGeometry(conn, xproto.Drawable(moving)).Reply()
 		ce(err)
-		pt("%+v\n", r)
+		pt("geometry %+v\n", geom)
 		offset, err := xproto.TranslateCoordinates(
 			conn, moving, setup.DefaultScreen(conn).Root,
-			0, 0,
+			geom.X, geom.Y,
 		).Reply()
 		ce(err)
-		pt("%+v\n", offset)
+		pt("offset %+v\n", offset)
 		winX := offset.DstX + deltaX
 		winY := offset.DstY + deltaY
 		pt("move %d to %d %d\n", moving, winX, winY)
